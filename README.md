@@ -31,7 +31,7 @@ A utility for generating a CSV export of all players for a particular ESMS game.
 
 1. Open Command Prompt
 2. Switch to directory executable is in e.g. `cd C:\path\to\rosters`
-3. Call the executable to run the [default behaviour](#default-behaviour) e.g.
+3. Call the executable to run the [default behaviour](#default-behaviour) or [configure](#configuration) with the appropriate flags e.g.
 ```
 C:\path\to\rosters> ssl_scraper
 ```
