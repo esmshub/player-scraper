@@ -16,11 +16,11 @@ import (
 )
 
 var (
-	flagUrl           = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "URL for teams page on the SSL website")
+	flagUrl           = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "Teams page URL on SSL website")
 	flagDownloadFiles = flag.Bool("download-files", true, "Download rosters from the SSL website if missing")
 	flagDir           = flag.String("dir", ".", "Local directory of rosters")
 	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")
-	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests")
+	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests when loading rosters")
 	flagStopOnError   = flag.Bool("stop-on-error", true, "Stop all requests on first error")
 )
 
