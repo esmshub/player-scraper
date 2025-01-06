@@ -1,14 +1,10 @@
 # Specify the GOOS and GOARCH variables
 export CGO_ENABLED=0
 export GOARCH=amd64
-
-# Set to x84 arch for 32-bit builds
-ifeq ($(MAKECMDGOALS), win32)
-	export GOARCH=386
-endif
+export GOOS=darwin
 
 # Remove debug information for release builds
-ifeq ($(MAKECMDGOALS), debug)
+ifeq ($(MAKECMDGOALS), build)
 	OUTPUT_DIR=bin/debug
 	LDFLAGS=""
 else 
@@ -16,40 +12,33 @@ else
 	OUTPUT_DIR=bin/release
 endif
 
-# Set output file and tags based on target game
-ifeq ($(TARGET), ssl)
-	ENTRYPOINT=./cmd/ssl
-	OUTPUT_FILE=$(OUTPUT_DIR)/ssl_scraper
-	TAGS=ssl
-else ifeq ($(TARGET), ffo)
-	ENTRYPOINT=./cmd/ffo
-	OUTPUT_FILE=$(OUTPUT_DIR)/ffo_scraper
-	TAGS=ffo
-endif
+build:
+	@BUILD_DIR=$(OUTPUT_DIR)/$(GOOS)/$(GOARCH) && \
+	OUTPUT_FILE=$$BUILD_DIR/$(TARGET)_scraper$(FILE_EXT) && \
+	rm -rf $$BUILD_DIR && \
+	go build -ldflags=$(LDFLAGS) -tags $(TARGET) -o $$OUTPUT_FILE ./cmd/$(TARGET)
 
-# Append .exe to output file for Windows builds
-ifeq ($(findstring win,$(MAKECMDGOALS)),win)
-  OUTPUT_FILE := $(OUTPUT_FILE).exe
-endif
-
-BUILDCMD=go build -ldflags=$(LDFLAGS) -tags $(TAGS) -o $(OUTPUT_FILE) $(ENTRYPOINT)
-
-debug:
-	@echo "Building debug..."
-	$(BUILDCMD)
+package:
+	@PKG_DIR=$(OUTPUT_DIR)/$(GOOS)/$(GOARCH) && \
+	echo "Packaging $$PKG_DIR..." && \
+	if [ "$(GOOS)" = "linux" ]; then \
+		tar -czvf $(TARGET)_scraper.$(GOOS)_$(GOARCH).tgz "$$PKG_DIR"; \
+	else \
+		zip -rj "$$PKG_DIR/$(TARGET)_scraper.$(GOOS)_$(GOARCH).zip" "$$PKG_DIR"; \
+	fi
 
 win:
 	@echo "Building for Windows (x64)..."
-	GOOS=windows $(BUILDCMD)
+	@$(MAKE) FILE_EXT=.exe GOOS=windows build package
 
 win32:
 	@echo "Building for Windows (x86)..."
-	GOOS=windows $(BUILDCMD)
+	@$(MAKE) FILE_EXT=.exe GOOS=windows GOARCH=386 build package
 
 linux:
 	@echo "Building for Linux..."
-	GOOS=linux $(BUILDCMD)
+	@$(MAKE) GOOS=linux build package
 
 mac:
-	@echo "Building for Mac..."
-	GOOS=darwin $(BUILDCMD)
+	@echo "Building for MacOS..."
+	@$(MAKE) GOOS=darwin build package
