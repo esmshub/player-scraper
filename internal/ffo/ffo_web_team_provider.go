@@ -23,17 +23,14 @@ func (p *FfoWebTeamProvider) Load() ([]*core.RosterFile, error) {
 		return rosters, err
 	}
 
-	// instantiate a new collector object
 	c := colly.NewCollector(
 		colly.AllowedDomains(rootUrl.Hostname()),
 	)
 
-	// triggered when the scraper encounters an error
 	c.OnError(func(_ *colly.Response, e error) {
 		err = e
 	})
 
-	// triggered when a CSS selector matches an element
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		u, err := url.Parse(e.Request.AbsoluteURL(e.Attr("href")))
 		if err != nil {

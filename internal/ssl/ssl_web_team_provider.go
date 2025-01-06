@@ -23,17 +23,14 @@ func (p *SslWebTeamProvider) Load() ([]*core.RosterFile, error) {
 		return rosters, err
 	}
 
-	// instantiate a new collector object
 	c := colly.NewCollector(
 		colly.AllowedDomains(url.Hostname()),
 	)
 
-	// triggered when the scraper encounters an error
 	c.OnError(func(_ *colly.Response, e error) {
 		err = e
 	})
 
-	// triggered when a CSS selector matches an element
 	c.OnHTML("table", func(e *colly.HTMLElement) {
 		subTables := e.DOM.Find("table") // Select the desired child elements
 		subTables.Last().Find("tr").Each(func(i int, selection *goquery.Selection) {

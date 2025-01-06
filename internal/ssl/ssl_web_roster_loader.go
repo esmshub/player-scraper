@@ -27,24 +27,21 @@ func (l *SslWebRosterLoader) Load(rosters []*core.RosterFile, context context.Co
 		colly.Async(true),
 	)
 
-	// Use OnRequest callback to associate the context
 	collector.OnRequest(func(r *colly.Request) {
 		select {
 		case <-context.Done(): // If context is cancelled, stop the request
-			r.Abort() // Abort the request
+			r.Abort()
 		default:
 			//
 		}
 	})
 
-	// triggered when the scraper encounters an error
 	collector.OnError(func(_ *colly.Response, e error) {
 		if l.onError != nil {
 			l.onError(e)
 		}
 	})
 
-	// fired when the server responds
 	collector.OnResponse(func(r *colly.Response) {
 		for _, ros := range rosters {
 			if strings.HasSuffix(r.Request.URL.String(), ros.FileLocation) {
