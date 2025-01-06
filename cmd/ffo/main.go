@@ -16,11 +16,11 @@ import (
 )
 
 var (
-	flagUrl           = flag.String("clubs-url", "https://www.ffomanager.com/clubs.html", "Clubs page URL on FFO website")
-	flagDownloadFiles = flag.Bool("download-files", true, "Download rosters from the FFO website if missing")
-	flagDir           = flag.String("dir", ".", "Local directory of rosters")
+	flagTeamsUrl      = flag.String("teams-url", "https://www.ffomanager.com/clubs.html", "URL to scrape for team information on FFO website")
+	flagDownloadFiles = flag.Bool("download-files", true, "Download roster files from the FFO website if missing")
+	flagRostersDir    = flag.String("rosters-dir", ".", "Location of local roster files")
 	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")
-	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests when loading rosters")
+	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests when loading roster files")
 	flagStopOnError   = flag.Bool("stop-on-error", true, "Stop all requests on first error")
 )
 
@@ -30,13 +30,13 @@ func main() {
 
 	flag.Parse()
 
-	parsedUrl, err := url.Parse(*flagUrl)
+	parsedUrl, err := url.Parse(*flagTeamsUrl)
 	if err != nil {
 		log.Fatalf("Failed to parse URL: %v", err)
 	}
 
 	fmt.Print("Loading clubs")
-	provider := ffo.NewTeamProvider(*flagUrl)
+	provider := ffo.NewTeamProvider(parsedUrl.String())
 	rosters, err := provider.Load()
 	if err != nil {
 		log.Fatalf("Failed to load rosters: %v", err)
@@ -55,7 +55,7 @@ func main() {
 	errors := []error{}
 	ctx, cancel := context.WithCancel(context.Background())
 	loader := &core.FileRosterLoader{
-		Dir:           *flagDir,
+		Dir:           *flagRostersDir,
 		RemoteUrl:     fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host),
 		DownloadFiles: *flagDownloadFiles,
 		MaxConcurrent: *flagMaxParallel,
