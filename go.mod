@@ -1,4 +1,4 @@
-module esms_scraper
+module player-scraper
 
 go 1.21.6
 

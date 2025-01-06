@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"bufio"
@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-type EsmsRosterParser struct{}
+type TextRosterParser struct{}
 
-func (p *EsmsRosterParser) Parse(data io.Reader) (*[][]string, error) {
+func (p *TextRosterParser) Parse(data io.Reader) (*[][]string, error) {
 	scanner := bufio.NewScanner(data)
 	rows := [][]string{}
 	for scanner.Scan() {

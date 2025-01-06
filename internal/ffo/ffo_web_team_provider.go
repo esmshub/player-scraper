@@ -1,9 +1,10 @@
-package main
+package ffo
 
 import (
 	"fmt"
 	"net/url"
 	"path"
+	"player-scraper/internal/core"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -13,8 +14,8 @@ type FfoWebTeamProvider struct {
 	url string
 }
 
-func (p *FfoWebTeamProvider) Load() ([]*RosterFile, error) {
-	rosters := []*RosterFile{}
+func (p *FfoWebTeamProvider) Load() ([]*core.RosterFile, error) {
+	rosters := []*core.RosterFile{}
 	var err error
 
 	rootUrl, err := url.Parse(p.url)
@@ -42,7 +43,7 @@ func (p *FfoWebTeamProvider) Load() ([]*RosterFile, error) {
 		if strings.HasPrefix(u.Path, "/clubs/club_pages") {
 			code := strings.TrimSuffix(path.Base(u.Path), path.Ext(path.Base(u.Path)))
 			league := strings.TrimSuffix(path.Base(e.Request.URL.Path), path.Ext(e.Request.URL.Path))
-			rosters = append(rosters, &RosterFile{
+			rosters = append(rosters, &core.RosterFile{
 				Code:         code,
 				League:       league,
 				FileLocation: fmt.Sprintf("text_files/%s/roster/%s.txt", league, code),
@@ -56,4 +57,10 @@ func (p *FfoWebTeamProvider) Load() ([]*RosterFile, error) {
 	c.Wait()
 
 	return rosters, err
+}
+
+func NewTeamProvider(url string) *FfoWebTeamProvider {
+	return &FfoWebTeamProvider{
+		url: url,
+	}
 }

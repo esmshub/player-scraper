@@ -1,4 +1,4 @@
-//go:build ffo
+//go:build ssl
 
 package main
 
@@ -8,22 +8,24 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"player-scraper/internal/core"
+	"player-scraper/internal/ssl"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
 )
 
 var (
-	flagUrl         = flag.String("clubs-url", "https://www.ffomanager.com/clubs.html", "File URL to list of all players in FFO")
-	flagDownload    = flag.Bool("download", true, "Download rosters from the FFO website if missing")
-	flagDir         = flag.String("dir", ".", "Local directory of rosters")
-	flagOutputDir   = flag.String("output-dir", ".", "Output directory for CSV files")
-	flagMaxParallel = flag.Int("max-concurrent", 5, "Number of concurrent requests")
-	flagStopOnError = flag.Bool("stop-on-error", true, "Stop all requests on first error")
+	flagUrl           = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "URL for teams page on the SSL website")
+	flagDownloadFiles = flag.Bool("download-files", true, "Download rosters from the SSL website if missing")
+	flagDir           = flag.String("dir", ".", "Local directory of rosters")
+	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")
+	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests")
+	flagStopOnError   = flag.Bool("stop-on-error", true, "Stop all requests on first error")
 )
 
 func main() {
-	fmt.Println("\nFFO Player Scraper")
+	fmt.Println("\nSSL Player Scraper")
 	fmt.Println("------------------")
 
 	flag.Parse()
@@ -34,9 +36,7 @@ func main() {
 	}
 
 	fmt.Print("Loading clubs")
-	provider := &FfoWebTeamProvider{
-		url: *flagUrl,
-	}
+	provider := ssl.NewTeamProvider(*flagUrl)
 	rosters, err := provider.Load()
 	if err != nil {
 		log.Fatalf("Failed to load rosters: %v", err)
@@ -54,15 +54,15 @@ func main() {
 
 	errors := []error{}
 	ctx, cancel := context.WithCancel(context.Background())
-	loader := &EsmsFileRosterLoader{
-		dir:           *flagDir,
-		remoteUrl:     fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host),
-		download:      *flagDownload,
-		maxConcurrent: *flagMaxParallel,
-		onLoaded: func(r *RosterFile) {
+	loader := &core.FileRosterLoader{
+		Dir:           *flagDir,
+		RemoteUrl:     fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host),
+		DownloadFiles: *flagDownloadFiles,
+		MaxConcurrent: *flagMaxParallel,
+		OnLoaded: func(r *core.RosterFile) {
 			tracker.Increment(1)
 		},
-		onError: func(e error) {
+		OnError: func(e error) {
 			errors = append(errors, e)
 			if *flagStopOnError {
 				cancel()
@@ -71,7 +71,6 @@ func main() {
 			}
 		},
 	}
-
 	// instantiate a Progress Writer and set up the options
 	pw := progress.NewWriter()
 	pw.AppendTracker(tracker)
@@ -104,7 +103,7 @@ func main() {
 
 	pw.Stop()
 	if !tracker.IsErrored() {
-		_, err = ExportToCsv(rosters, *flagOutputDir, "ffo_players_", "FFO Player List")
+		_, err = core.ExportToCsv(rosters, *flagOutputDir, "ssl_players_", "SSL Player List")
 		if err != nil {
 			log.Fatalf("Failed to create output CSV file: %v", err)
 		}

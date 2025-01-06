@@ -1,9 +1,10 @@
-package main
+package ssl
 
 import (
 	"context"
 	"fmt"
 	"net/url"
+	"player-scraper/internal/core"
 	"strings"
 	"time"
 
@@ -13,12 +14,12 @@ import (
 type SslWebRosterLoader struct {
 	url           *url.URL
 	maxConcurrent int
-	onLoaded      func(*RosterFile)
+	onLoaded      func(*core.RosterFile)
 	onError       func(error)
 }
 
-func (l *SslWebRosterLoader) Load(rosters []*RosterFile, context context.Context) {
-	parser := &EsmsRosterParser{}
+func (l *SslWebRosterLoader) Load(rosters []*core.RosterFile, context context.Context) {
+	parser := &core.TextRosterParser{}
 
 	collector := colly.NewCollector(
 		colly.AllowedDomains(l.url.Hostname()),

@@ -17,10 +17,12 @@ else
 endif
 
 # Set output file and tags based on target game
-ifeq ($(GAME), ssl)
+ifeq ($(TARGET), ssl)
+	ENTRYPOINT=./cmd/ssl
 	OUTPUT_FILE=$(OUTPUT_DIR)/ssl_scraper
 	TAGS=ssl
-else ifeq ($(GAME), ffo)
+else ifeq ($(TARGET), ffo)
+	ENTRYPOINT=./cmd/ffo
 	OUTPUT_FILE=$(OUTPUT_DIR)/ffo_scraper
 	TAGS=ffo
 endif
@@ -30,7 +32,7 @@ ifeq ($(findstring win,$(MAKECMDGOALS)),win)
   OUTPUT_FILE := $(OUTPUT_FILE).exe
 endif
 
-BUILDCMD=go build -ldflags=$(LDFLAGS) -tags $(TAGS) -o $(OUTPUT_FILE)
+BUILDCMD=go build -ldflags=$(LDFLAGS) -tags $(TAGS) -o $(OUTPUT_FILE) $(ENTRYPOINT)
 
 debug:
 	@echo "Building debug..."
@@ -51,7 +53,3 @@ linux:
 mac:
 	@echo "Building for Mac..."
 	GOOS=darwin $(BUILDCMD)
-
-clean:
-	@echo "Cleaning up output file..."
-	rm -f $(OUTPUT_FILE)

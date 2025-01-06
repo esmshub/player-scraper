@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"context"
@@ -14,26 +14,26 @@ import (
 	"time"
 )
 
-type EsmsFileRosterLoader struct {
-	remoteUrl     string
-	download      bool
-	dir           string
-	maxConcurrent int
-	onLoaded      func(*RosterFile)
-	onError       func(error)
+type FileRosterLoader struct {
+	RemoteUrl     string
+	DownloadFiles bool
+	Dir           string
+	MaxConcurrent int
+	OnLoaded      func(*RosterFile)
+	OnError       func(error)
 }
 
-func (l *EsmsFileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) {
-	if _, err := os.Stat(l.dir); err != nil {
+func (l *FileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) {
+	if _, err := os.Stat(l.Dir); err != nil {
 		if os.IsNotExist(err) {
-			if l.onError != nil {
-				l.onError(fmt.Errorf("directory does not exist: %s", l.dir))
+			if l.OnError != nil {
+				l.OnError(fmt.Errorf("directory does not exist: %s", l.Dir))
 			}
 		}
 	}
 
 	// Create a semaphore with a buffer size of maxConcurrent
-	sem := make(chan struct{}, int(math.Max(1, float64(l.maxConcurrent))))
+	sem := make(chan struct{}, int(math.Max(1, float64(l.MaxConcurrent))))
 	defer close(sem)
 
 	errCh := make(chan error)
@@ -44,9 +44,9 @@ func (l *EsmsFileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) 
 
 	var wg sync.WaitGroup
 
-	parser := &EsmsRosterParser{}
+	parser := &TextRosterParser{}
 	downloadRoster := func(roster *RosterFile) ([]byte, error) {
-		fileUrl, err := url.JoinPath(l.remoteUrl, roster.FileLocation)
+		fileUrl, err := url.JoinPath(l.RemoteUrl, roster.FileLocation)
 		if err != nil {
 			return nil, err
 		}
@@ -63,12 +63,12 @@ func (l *EsmsFileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) 
 		return io.ReadAll(res.Body)
 	}
 	loadAndParse := func(roster *RosterFile) (*[][]string, error) {
-		localPath := filepath.Join(l.dir, roster.Code+".txt")
+		localPath := filepath.Join(l.Dir, roster.Code+".txt")
 		file, err := os.Open(localPath)
 		if err == nil {
 			defer file.Close()
 			return parser.Parse(file)
-		} else if os.IsNotExist(err) && l.remoteUrl != "" {
+		} else if os.IsNotExist(err) && l.RemoteUrl != "" {
 			// check remote
 			contents, err := downloadRoster(roster)
 			if err != nil {
@@ -80,7 +80,7 @@ func (l *EsmsFileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) 
 				return nil, err
 			}
 
-			if l.download {
+			if l.DownloadFiles {
 				// save roster locally
 				err = os.WriteFile(localPath, contents, 0644)
 				if err != nil {
@@ -126,12 +126,12 @@ func (l *EsmsFileRosterLoader) Load(rosters []*RosterFile, ctx context.Context) 
 		for {
 			select {
 			case ros, ok := <-resultCh:
-				if ok && l.onLoaded != nil {
-					l.onLoaded(ros)
+				if ok && l.OnLoaded != nil {
+					l.OnLoaded(ros)
 				}
 			case err, ok := <-errCh:
-				if ok && l.onError != nil {
-					l.onError(err)
+				if ok && l.OnError != nil {
+					l.OnError(err)
 				}
 			}
 		}
