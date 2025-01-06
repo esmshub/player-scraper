@@ -108,13 +108,13 @@ C:\scraper> <game>_scraper -output-dir=C:\esms\data
 
 ## Versions
 
-OS | Arch
---- | ---
-Windows 10 or later | `<game>_scraper.win10.x86_64.zip`
-Windows 10 or later (32-bit) | `<game>_scraper.win10.i386.zip`
-Windows 7 or later | `<game>_scraper.win7.x86_64.zip`
-Windows 7 or later (32-bit) | `<game>_scraper.win7.i386.zip`
-macOS 10.15 Catalina or later | `<game>_scraper.darwin.x86_64.zip`
-Linux (most distributions) | `<game>_scraper.linux.x86_64.zip`
+OS | Arch | File
+--- | --- | ---
+Windows 10 or later | 64-bit | `*.windows_amd64.zip`
+Windows 10 or later | 32-bit | `*.windows_i386.zip`
+Windows 7 or later | 64-bit | `*.win7_amd64.zip`
+Windows 7 or later | 32-bit | `*.win7_i386.zip`
+macOS 10.15 Catalina or later | Universal | `*.macOS.zip`
+Linux (most distributions) | 64-bit | `*.linux.x86_64.zip`
 
 
