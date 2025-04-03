@@ -15,26 +15,26 @@ A utility for generating a CSV export of all players for a particular ESMS game.
     <img src=".github/img/empty_folder.png" width="350px">
 
 
-2. Double click the exe to run the [default behaviour](#default-behaviour)
+2. Double click the exe to run with the [default settings](#Configuration) (UI mode is enabled by default)
 
-    <img src=".github/img/scraper_preview.png" width="350px">
+    <img src=".github/img/scraper_ui.png" width="350px">
 
-    Notice the generated CSV file and missing rosters have been downloaded
+    Choose your scrape mode and fill out the required fields (sensible defaults are used to help fast track).
+
+3. Once finished, you should see something like this:
+
+    <img src=".github/img/scraper_done.png" width="350px">
+
+     *_If there are any errors during the scrape those will be listed at the bottom, the scraper will still generate a final report with the information it was able to scrape._
+     
+     At this point the scraper is done so you can go aheaed and press the Enter/Return key to close the window. A CSV formatted report containing all player information should now be available in the output directory you specified (or the default location) e.g.
 
     <img src=".github/img/after_scrape.png" width="350px">
 
-3. Open the generated CSV file (i.e. `<game>_players_<timestamp>.csv`) in Excel (or equivalent) for advanced search & filtering
+4. Open the generated CSV file (i.e. `<game>_players_<timestamp>.csv`) in Excel (or equivalent) for advanced search & filtering
 
     <img src=".github/img/excel_example.png" width="350px">
 
-#### Running from the CLI
-
-1. Open Command Prompt
-2. Switch to directory executable is in e.g. `cd C:\path\to\rosters`
-3. Call the executable to run the [default behaviour](#default-behaviour) or [configure](#configuration) with the appropriate flags e.g.
-```
-C:\path\to\rosters> ssl_scraper
-```
 
 ### Mac / Linux
 ```
@@ -53,27 +53,33 @@ The configuration options are mostly the same across all games, if you want to s
 <Game> Player Scraper
 ------------------
 Usage of <game>_scraper:
+  -ci
+        Run in CI mode and disable prompts (default false)
   -download-files
-        Download rosters from the <Game> website if missing (default true)
+        Download the latest rosters from the <Game> website (default false)
   -max-concurrent int
         Number of concurrent requests when loading rosters (default 5)
   -output-dir string
         Output directory for CSV files (default ".")
   -rosters-dir string
-        Location of local rosters (default ".")
+        Target directory for downloading or sourcing local rosters (default ".")
   -stop-on-error
-        Stop all requests on first error (default true)
+        Stop all requests on first error (default false)
   -teams-url string
         URL to scrape for team information on <Game> website (default "<url>")
 ```
 
-#### Default behaviour
+### CI mode
 
-The application is setup for the most common usecase i.e. source rosters from the current directory and download them from the relevant website where missing. 
+If looking to run the scraper in a CI environment or from a script, pass the `-ci` flag to disable the UI prompts.
 
-For example, if `abc` club does not have a local roster file (i.e. `abc.txt`) then `abc.txt` will be downloaded into the roster directory as part of the scrape.
-
-This behaviour can be tweaked slightly via the [configuration flags](#configuration) e.g.
+1. Open Command Prompt / Terminal
+2. Switch to directory executable is in e.g. `cd C:\path\to\rosters`
+3. Call the executable with the `-ci` flag and [configure](#configuration) with the appropriate flags e.g.
+```
+# an example of a scrape + download
+C:\path\to\rosters> ssl_scraper -ci -download-files
+```
 
 **Scenario 1 - Increase the scrape speed**
 
@@ -84,27 +90,19 @@ The throughput of the scraper can be adjusted via the `-max-concurrent` flag. Th
 
 *Note - be mindful that increasing the concurrency will put additional load onto the relevant game website (and your local machine) so use sensibly*
 
-**Scenario 2 - Avoid downloading rosters**
+**Scenario 2 - Stop the scrape if an error occurs at any point**
 
-You can stop the scraper from downloading rosters by running the executable with the `-download-files` flag to false i.e.
+By default, the scraper will ignore errors and keep going. If you want to stop the scraper as soon as possible then use the `-stop-on-error` flag:
 ```
-<game>_scraper -download-files=false
+<game>_scraper -stop-on-error
 ```
 
-**Scenario 2 - Change the roster file location**
+## Troubleshooting
 
-If you are running the scraper in a different location from your roster files, then you can pass the `-rosters-dir` flag to tell it where to find them. Otherwise the application will assume you have no rosters and source them remotely:
-```
-C:\scraper> <game>_scraper -rosters-dir=C:\esms\rosters
-```
-*Note - this does not determine where the generated output goes, see **Scenario 3**
+### My virus-scanning software thinks the application is infected
+Your virus-scanning software may flag this application, but there’s no cause for concern. This is a well-known issue with applications built using the Go programming language. You can find more details here: [Go FAQ](https://go.dev/doc/faq#virus).
 
-**Scenario 3 - Change the output directory**
-
-If you want to change the location of where the generated CSV then you can pass the `-output-dir` flag
-```
-C:\scraper> <game>_scraper -output-dir=C:\esms\data
-```
+Our application is completely open-source, meaning anyone can inspect the code to verify its safety. If you have any concerns, you’re welcome to review the source code yourself or run additional independent checks.
 
 ## Versions
 

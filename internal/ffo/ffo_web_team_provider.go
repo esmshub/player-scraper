@@ -41,9 +41,11 @@ func (p *FfoWebTeamProvider) Load() ([]*core.RosterFile, error) {
 			code := strings.TrimSuffix(path.Base(u.Path), path.Ext(path.Base(u.Path)))
 			league := strings.TrimSuffix(path.Base(e.Request.URL.Path), path.Ext(e.Request.URL.Path))
 			rosters = append(rosters, &core.RosterFile{
-				Code:         code,
-				League:       league,
-				FileLocation: fmt.Sprintf("text_files/%s/roster/%s.txt", league, code),
+				Code:                code,
+				League:              league,
+				FileLocation:        fmt.Sprintf("text_files/%s/roster/%s.txt", league, code),
+				InfoFileLocation:    fmt.Sprintf("text_files/%s/wages/INFO_%s.txt", league, code),
+				AcademyFileLocation: fmt.Sprintf("text_files/%s/academy/%s.txt", league, code),
 			})
 		} else if !strings.HasPrefix(e.Attr("href"), rootUrl.String()) {
 			c.Visit(e.Request.AbsoluteURL(e.Attr("href")))

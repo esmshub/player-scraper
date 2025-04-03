@@ -8,32 +8,59 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"player-scraper/internal/core"
 	"player-scraper/internal/ssl"
+	"player-scraper/internal/ui"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/progress"
+	"github.com/skratchdot/open-golang/open"
 )
 
 var (
 	flagTeamsUrl      = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "URL to scrape for team information on SSL website")
-	flagDownloadFiles = flag.Bool("download-files", true, "Download roster files from the SSL website if missing")
-	flagRostersDir    = flag.String("rosters-dir", ".", "Location of local roster files")
+	flagDownloadFiles = flag.Bool("download-files", false, "Download the latest rosters from the SSL website")
+	flagRostersDir    = flag.String("rosters-dir", ".", "Target directory for downloading or sourcing local rosters")
 	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")
 	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests when loading roster files")
-	flagStopOnError   = flag.Bool("stop-on-error", true, "Stop all requests on first error")
+	flagStopOnError   = flag.Bool("stop-on-error", false, "Stop all requests on first error")
+	flagCiMode        = flag.Bool("ci", false, "Run in CI mode and disable prompts")
 )
 
-func main() {
-	fmt.Println("\nSSL Player Scraper")
-	fmt.Println("------------------")
+var appName = "SSL Player Scraper"
 
+func main() {
 	flag.Parse()
 
 	parsedUrl, err := url.Parse(*flagTeamsUrl)
 	if err != nil {
 		log.Fatalf("Failed to parse URL: %v", err)
 	}
+
+	opts := core.ScraperOptions{
+		LocalOnly:     false,
+		DownloadFiles: *flagDownloadFiles,
+		RosterDir:     *flagRostersDir,
+		OutputDir:     *flagOutputDir,
+	}
+
+	ciMode := true
+	if flagCiMode == nil || !*flagCiMode {
+		ciMode = false
+		var cancelled bool
+		opts, cancelled = ui.Run(appName)
+		if cancelled {
+			os.Exit(0)
+		}
+	}
+	// } else {
+	// 	fmt.Println("\n" + appName)
+	// 	fmt.Println("------------------")
+	// }
+
+	fmt.Print(fmt.Sprintf("\n%s\n", ui.StyleTitle(appName)))
 
 	fmt.Print("Loading clubs")
 	provider := ssl.NewTeamProvider(parsedUrl.String())
@@ -54,17 +81,21 @@ func main() {
 
 	errors := []error{}
 	ctx, cancel := context.WithCancel(context.Background())
+	remoteUrl := fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host)
+	if opts.LocalOnly {
+		remoteUrl = ""
+	}
 	loader := &core.FileRosterLoader{
-		Dir:           *flagRostersDir,
-		RemoteUrl:     fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host),
-		DownloadFiles: *flagDownloadFiles,
+		Dir:           opts.RosterDir,
+		RemoteUrl:     remoteUrl,
+		DownloadFiles: opts.DownloadFiles,
 		MaxConcurrent: *flagMaxParallel,
 		OnLoaded: func(r *core.RosterFile) {
 			tracker.Increment(1)
 		},
 		OnError: func(e error) {
 			errors = append(errors, e)
-			if *flagStopOnError {
+			if !opts.LocalOnly && *flagStopOnError {
 				cancel()
 			} else {
 				tracker.IncrementWithError(1)
@@ -102,18 +133,22 @@ func main() {
 	}
 
 	pw.Stop()
-	if !tracker.IsErrored() {
-		_, err = core.ExportToCsv(rosters, *flagOutputDir, "ssl_players_", "SSL Player List")
-		if err != nil {
-			log.Fatalf("Failed to create output CSV file: %v", err)
-		}
 
+	_, err = core.ExportToCsv(rosters, opts.OutputDir, "ssl_players_", "SSL Player List")
+	if err != nil {
+		log.Fatalf("Failed to create output CSV file: %v", err)
+	}
+
+	if len(errors) > 0 {
+		color.Red("Errors occurred while loading rosters:\n")
+		for _, e := range errors {
+			color.Red(" - %v\n", e)
+		}
+	}
+
+	if !ciMode {
 		fmt.Println("Press enter key to close ...")
 		fmt.Scanln()
-	} else if len(errors) > 0 {
-		fmt.Println("Errors occurred while loading rosters:")
-		for _, e := range errors {
-			fmt.Printf(" - %v\n", e)
-		}
+		open.Start(opts.OutputDir)
 	}
 }
