@@ -19,7 +19,7 @@ A utility for generating a CSV export of all players for a particular ESMS game.
 
     <img src=".github/img/scraper_ui.png" width="350px">
 
-    Choose your scrape mode and fill out the required fields (sensible defaults are used to help fast track).
+    Choose your scrape mode and fill out the required fields (or accept the default values).
 
 3. Once finished, you should see something like this:
 
@@ -27,7 +27,7 @@ A utility for generating a CSV export of all players for a particular ESMS game.
 
      *_If there are any errors during the scrape those will be listed at the bottom, the scraper will still generate a final report with the information it was able to scrape._
      
-     At this point the scraper is done so you can go aheaed and press the Enter/Return key to close the window. A CSV formatted report containing all player information should now be available in the output directory you specified (or the default location) e.g.
+     At this point the scraper is done so you can go ahead and press the Enter/Return key to close the window. A CSV formatted report containing all player information should now be available in the output directory you specified (or the default location) e.g.
 
     <img src=".github/img/after_scrape.png" width="350px">
 
