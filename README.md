@@ -10,7 +10,7 @@ A utility for generating a CSV export of all players for a particular ESMS game.
 
 ### Windows
 
-1. Download the appropriate [scraper version](#versions) for your OS and unzip the exe
+1. Download the [latest version](https://github.com/esmshub/player-scraper/releases/latest) of the scraper for your OS. If you are unsure about which version you need, [see this guide](#versions)
 
     <img src=".github/img/empty_folder.png" width="350px">
 
@@ -109,10 +109,9 @@ Our application is completely open-source, meaning anyone can inspect the code t
 OS | Arch | File
 --- | --- | ---
 Windows 10 or later | 64-bit | `*.windows_amd64.zip`
-Windows 10 or later | 32-bit | `*.windows_i386.zip`
+Windows 10 or later | 32-bit | `*.windows_386.zip`
 Windows 7 or later | 64-bit | `*.win7_amd64.zip`
-Windows 7 or later | 32-bit | `*.win7_i386.zip`
-macOS 10.15 Catalina or later | Universal | `*.macOS.zip`
-Linux (most distributions) | 64-bit | `*.linux.x86_64.zip`
+Windows 7 or later | 32-bit | `*.win7_386.zip`
+macOS 10.15 Catalina or later | Universal | `*.darwin.zip`
 
 
