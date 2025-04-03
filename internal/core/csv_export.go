@@ -7,7 +7,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -39,9 +38,14 @@ func getRowByVal(rows [][]string, colIndex int, value string) []string {
 }
 
 func getColByValue(row []string, value string) int {
-	return slices.IndexFunc(row, func(v string) bool {
-		return strings.HasSuffix(v, value)
-	})
+	idx := -1
+	for i, v := range row {
+		if strings.HasSuffix(v, value) {
+			idx = i
+			break
+		}
+	}
+	return idx
 }
 
 func normalizePlayerWage(wage string) string {

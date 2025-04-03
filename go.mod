@@ -1,6 +1,6 @@
 module player-scraper
 
-go 1.21.6
+go 1.22.6
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.1
@@ -11,6 +11,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/gocolly/colly v1.2.0
 	github.com/jedib0t/go-pretty/v6 v6.6.4
+	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 )
 
 require (
@@ -39,7 +40,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
-	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
