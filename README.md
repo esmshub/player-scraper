@@ -113,5 +113,4 @@ Windows 10 or later | 32-bit | `*.windows_386.zip`
 Windows 7 or later | 64-bit | `*.win7_amd64.zip`
 Windows 7 or later | 32-bit | `*.win7_386.zip`
 macOS 10.15 Catalina or later | Universal | `*.darwin.zip`
-
-
+Linux (most distributions) | 64-bit | `*.linux_amd64.tar.gz`

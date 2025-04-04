@@ -22,7 +22,7 @@ package:
 	@PKG_DIR=$(OUTPUT_DIR)/$(GOOS)/$(GOARCH) && \
 	echo "Packaging $$PKG_DIR..." && \
 	if [ "$(GOOS)" = "linux" ]; then \
-		tar -czvf $(TARGET)_scraper.$(GOOS)_$(GOARCH).tgz "$$PKG_DIR"; \
+		tar -czvf "$(TARGET)_scraper.$(GOOS)_$(GOARCH).tgz" -C "$$PKG_DIR" .; \
 	else \
 		zip -rj "$$PKG_DIR/$(TARGET)_scraper.$(GOOS)_$(GOARCH).zip" "$$PKG_DIR"; \
 	fi
