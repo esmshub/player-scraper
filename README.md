@@ -58,7 +58,7 @@ Usage of <game>_scraper:
   -download-files
         Download the latest rosters from the <Game> website (default false)
   -excel-export
-        Use Excel-compatible formulas instead of raw values (default true)
+        Use Excel-compatible formulas instead of raw values for calculated fields (default true)
   -max-concurrent int
         Number of concurrent requests when loading rosters (default 5)
   -output-dir string

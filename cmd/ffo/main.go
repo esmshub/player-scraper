@@ -26,7 +26,7 @@ var (
 	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")
 	flagMaxParallel   = flag.Int("max-concurrent", 5, "Number of concurrent requests when loading roster files")
 	flagStopOnError   = flag.Bool("stop-on-error", false, "Stop all requests on first error")
-	flagExcelExport   = flag.Bool("excel-export", true, "Use Excel-compatible formulas instead of raw values")
+	flagExcelExport   = flag.Bool("excel-export", true, "Use Excel-compatible formulas instead of raw values for calculated fields")
 	flagCiMode        = flag.Bool("ci", false, "Run in CI mode and disable prompts")
 )
 
