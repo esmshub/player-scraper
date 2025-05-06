@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,21 @@ import (
 )
 
 var cashRegex = regexp.MustCompile(`[^\d.]`)
+
+func getLetterForCol(col int) string {
+	if col < 1 {
+		return ""
+	}
+
+	result := ""
+	for col > 0 {
+		col-- // Decrement to make it 0-indexed
+		result = string('A'+(col%26)) + result
+		col /= 26
+	}
+
+	return result
+}
 
 func getRowByVal(rows [][]string, colIndex int, value string) []string {
 	var result []string
@@ -67,7 +83,16 @@ func extractNumbers(input string) string {
 	return cashRegex.ReplaceAllString(input, "")
 }
 
-func ExportToCsv(rosters []*RosterFile, outputDir, fileNamePrefix string, title string) (string, error) {
+func getColInt(row []string, index int) int {
+	val, err := strconv.Atoi(row[index])
+	if err != nil {
+		color.Yellow("Failed to convert column to integer: %v", err)
+	}
+
+	return val
+}
+
+func ExportToCsv(rosters []*RosterFile, outputDir string, useExcelFormulas bool, fileNamePrefix string, title string) (string, error) {
 
 	if _, err := os.Stat(outputDir); err != nil {
 		if os.IsNotExist(err) {
@@ -121,6 +146,15 @@ func ExportToCsv(rosters []*RosterFile, outputDir, fileNamePrefix string, title 
 		"Sus",
 	}
 
+	// adjust headers for <stat>/min columns
+	statCols := []string{"Sav", "Ktk", "Kps", "Gls"}
+	for _, colName := range statCols {
+		colIdx := slices.Index(headers, colName)
+		if colIdx > -1 {
+			headers = slices.Insert(headers, colIdx+1, fmt.Sprintf("%s/min", colName))
+		}
+	}
+
 	hasInfo := false
 	// write each club as a CSV row
 	records := [][]string{}
@@ -136,6 +170,32 @@ func ExportToCsv(rosters []*RosterFile, outputDir, fileNamePrefix string, title 
 			for i, row := range *r.Rows {
 				if i > 0 { // skip header row
 					fields := append([]string{r.Name, r.Code, r.League}, row...)
+					// add <stat>/min col values
+					minColIdx := slices.Index(headers, "Min")
+					if minColIdx > -1 && len(fields) > minColIdx {
+						minsPlayed := getColInt(fields, minColIdx)
+						for _, statName := range statCols {
+							statColIdx := slices.Index(headers, statName)
+							if statColIdx > -1 && len(fields) > statColIdx {
+								val := "0"
+								if useExcelFormulas {
+									val = fmt.Sprintf("=IFERROR(INDEX(%s:%[1]s, ROW()) / INDEX(%s:%[2]s, ROW()), 0)", getLetterForCol(statColIdx+1), getLetterForCol(minColIdx+1))
+								} else {
+									statVal := getColInt(fields, statColIdx)
+									if statVal != 0 && minsPlayed != 0 {
+
+										val = fmt.Sprintf("%f", float64(statVal)/float64(minsPlayed))
+									}
+								}
+								fields = slices.Insert(fields, statColIdx+1, val)
+							} else {
+								color.Yellow("%s column index not found", statName)
+							}
+						}
+					} else {
+						color.Yellow("Min column index not found")
+					}
+					// add wage and value columns
 					if r.InfoRows != nil {
 						inf := getRowByVal(*r.InfoRows, 0, row[0])
 						if len(inf) > max(wageIndex, valueIndex) {
@@ -152,7 +212,7 @@ func ExportToCsv(rosters []*RosterFile, outputDir, fileNamePrefix string, title 
 	}
 
 	if hasInfo {
-		headers = append(headers, "Wage (K)", "Value (M)")
+		headers = append(headers, "Wage", "Mkt Value")
 	}
 	writer.Write(headers)
 
