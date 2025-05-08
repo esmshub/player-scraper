@@ -7,6 +7,7 @@ type ScraperOptions struct {
 	DownloadFiles bool
 	RosterDir     string
 	OutputDir     string
+	ExcelExport   bool
 }
 
 type RosterLoader interface {

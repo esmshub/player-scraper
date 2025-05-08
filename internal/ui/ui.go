@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"player-scraper/internal/core"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -137,6 +138,14 @@ func validatePathDir(v string) error {
 	return nil
 }
 
+func validateBool(v string) error {
+	if strings.ToLower(v) != "y" && strings.ToLower(v) != "n" {
+		return errors.New("must be 'y' or 'n'")
+	}
+
+	return nil
+}
+
 func getInputsForMode(mode ScrapeMode) []FormInputModel {
 	var cwd, err = os.Getwd()
 	if err != nil {
@@ -145,6 +154,7 @@ func getInputsForMode(mode ScrapeMode) []FormInputModel {
 
 	inputs := []FormInputModel{
 		{id: "outputDir", field: createInputModel("Report output dir: ", cwd, 255, validatePathDir)},
+		{id: "excelExport", field: createInputModel("Use Excel formulas: ", "y", 1, validateBool)},
 	}
 
 	if mode != ScrapeOnly {
@@ -208,6 +218,7 @@ func Run(appName string) (core.ScraperOptions, bool) {
 		DownloadFiles: mo.mode == ScrapeAndDownload,
 		RosterDir:     "",
 		OutputDir:     getFormValue("outputDir"),
+		ExcelExport:   strings.ToLower(getFormValue("excelExport")) == "y",
 	}
 
 	if mo.mode != ScrapeOnly {
