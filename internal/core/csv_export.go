@@ -155,6 +155,7 @@ func ExportToCsv(rosters []*RosterFile, outputDir string, useExcelFormulas bool,
 		}
 	}
 
+	minColIdx := slices.Index(headers, "Min")
 	hasInfo := false
 	// write each club as a CSV row
 	records := [][]string{}
@@ -171,7 +172,6 @@ func ExportToCsv(rosters []*RosterFile, outputDir string, useExcelFormulas bool,
 				if i > 0 { // skip header row
 					fields := append([]string{r.Name, r.Code, r.League}, row...)
 					// add <stat>/min col values
-					minColIdx := slices.Index(headers, "Min")
 					if minColIdx > -1 && len(fields) > minColIdx {
 						minsPlayed := getColInt(fields, minColIdx)
 						for _, statName := range statCols {
@@ -188,12 +188,8 @@ func ExportToCsv(rosters []*RosterFile, outputDir string, useExcelFormulas bool,
 									}
 								}
 								fields = slices.Insert(fields, statColIdx+1, val)
-							} else {
-								color.Yellow("%s column index not found", statName)
 							}
 						}
-					} else {
-						color.Yellow("Min column index not found")
 					}
 					// add wage and value columns
 					if r.InfoRows != nil {
