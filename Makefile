@@ -3,12 +3,21 @@ export CGO_ENABLED=0
 export GOARCH=amd64
 export GOOS=darwin
 
+ifndef TARGET
+$(error TARGET is not set)
+endif
+
+ifndef VERSION
+$(error VERSION is not set)
+endif
+
 # Remove debug information for release builds
 ifeq ($(MAKECMDGOALS), build)
 	OUTPUT_DIR=bin/debug
 	LDFLAGS=""
 else 
-	LDFLAGS="-s -w"
+  GAME_NAME=$(shell echo $(TARGET) | tr '[:lower:]' '[:upper:]')
+	LDFLAGS="-s -w -X=main.version=$(VERSION) -X=main.gameName=$(GAME_NAME)"
 	OUTPUT_DIR=bin/release
 endif
 
@@ -16,15 +25,15 @@ build:
 	@BUILD_DIR=$(OUTPUT_DIR)/$(GOOS)/$(GOARCH) && \
 	OUTPUT_FILE=$$BUILD_DIR/$(TARGET)_scraper$(FILE_EXT) && \
 	rm -rf $$BUILD_DIR && \
-	go build -ldflags=$(LDFLAGS) -tags $(TARGET) -o $$OUTPUT_FILE ./cmd/$(TARGET)
+	go build -trimpath -ldflags=$(LDFLAGS) -tags $(TARGET) -o $$OUTPUT_FILE ./cmd/$(TARGET)
 
 package:
 	@PKG_DIR=$(OUTPUT_DIR)/$(GOOS)/$(GOARCH) && \
 	echo "Packaging $$PKG_DIR..." && \
 	if [ "$(GOOS)" = "linux" ]; then \
-		tar -czvf "$(TARGET)_scraper.$(GOOS)_$(GOARCH).tgz" -C "$$PKG_DIR" .; \
+		tar -czvf "$(TARGET)_scraper_$(VERSION)_$(GOOS)_$(GOARCH).tgz" -C "$$PKG_DIR" .; \
 	else \
-		zip -rj "$$PKG_DIR/$(TARGET)_scraper.$(GOOS)_$(GOARCH).zip" "$$PKG_DIR"; \
+		zip -rj "$$PKG_DIR/$(TARGET)_scraper_$(VERSION)_$(GOOS)_$(GOARCH).zip" "$$PKG_DIR"; \
 	fi
 
 win:
