@@ -20,6 +20,8 @@ import (
 )
 
 var (
+	version           = "dev"
+	gameName          = "ESMS"
 	flagTeamsUrl      = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "URL to scrape for team information on SSL website")
 	flagDownloadFiles = flag.Bool("download-files", false, "Download the latest rosters from the SSL website")
 	flagRostersDir    = flag.String("rosters-dir", ".", "Target directory for downloading or sourcing local rosters")
@@ -29,8 +31,6 @@ var (
 	flagExcelExport   = flag.Bool("excel-export", true, "Use Excel-compatible formulas instead of raw values for calculated fields")
 	flagCiMode        = flag.Bool("ci", false, "Run in CI mode and disable prompts")
 )
-
-var appName = "SSL Player Scraper"
 
 func main() {
 	flag.Parse()
@@ -48,6 +48,7 @@ func main() {
 		ExcelExport:   *flagExcelExport,
 	}
 
+	appName := fmt.Sprintf("%s Player Scraper v%s", gameName, version)
 	ciMode := true
 	if flagCiMode == nil || !*flagCiMode {
 		ciMode = false
@@ -57,10 +58,6 @@ func main() {
 			os.Exit(0)
 		}
 	}
-	// } else {
-	// 	fmt.Println("\n" + appName)
-	// 	fmt.Println("------------------")
-	// }
 
 	fmt.Print(fmt.Sprintf("\n%s\n", ui.StyleTitle(appName)))
 
