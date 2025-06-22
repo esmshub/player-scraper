@@ -7,6 +7,7 @@ import (
 	"player-scraper/internal/core"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,6 +67,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		// detect cancel propagation from list view ('q' key mainly)
+		if m.step == 0 && key.Matches(msg, m.list.KeyMap.Quit) {
+			m.cancelled = true
+			return m, tea.Quit
+		}
+
 		switch msg.Type {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			m.cancelled = true
