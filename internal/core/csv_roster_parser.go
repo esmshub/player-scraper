@@ -13,7 +13,7 @@ func (p *TextRosterParser) Parse(data io.Reader) (*[][]string, error) {
 	rows := [][]string{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line, "---") {
+		if strings.HasPrefix(line, "---") || len(strings.TrimSpace(line)) == 0 {
 			continue
 		}
 
