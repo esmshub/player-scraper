@@ -22,7 +22,7 @@ import (
 var (
 	version           = "dev"
 	gameName          = "ESMS"
-	flagTeamsUrl      = flag.String("teams-url", "http://www.ssl2001.ukhome.net/teams.htm", "URL to scrape for team information on SSL website")
+	flagTeamsUrl      = flag.String("teams-url", "http://ssl2001.uk/teams.htm", "URL to scrape for team information on SSL website")
 	flagDownloadFiles = flag.Bool("download-files", false, "Download the latest rosters from the SSL website")
 	flagRostersDir    = flag.String("rosters-dir", ".", "Target directory for downloading or sourcing local rosters")
 	flagOutputDir     = flag.String("output-dir", ".", "Output directory for CSV files")

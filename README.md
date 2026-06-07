@@ -1,10 +1,10 @@
 # player-scraper
 
-A utility for generating a CSV export of all players for a particular ESMS game.
+A utility for generating a CSV export of all players for a specific ESMS game.
 
 ### Supported games
 
-- [SSL](http://www.ssl2001.ukhome.net)
+- [SSL](http://ssl2001.uk)
 - [FFO](https://ffomanager.com)
 
 ## Usage
